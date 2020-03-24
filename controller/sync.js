@@ -35,7 +35,11 @@ module.exports = {
                     if (result.length === 0) {
                         res.status(200).json([]);
                     } else {
-                        res.status(200).json(result);
+                        res.status(200).json({
+                            tasks: result[0],
+                            library: result[1],
+                            tags: result[2]
+                        });
                     }
                 } catch(e) {
                     console.log(e);
