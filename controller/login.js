@@ -88,7 +88,7 @@ module.exports = {
     update(req, res) {
         req.on('data', async (data)=> {
             const {token} = req.headers;
-            const {name, theme, avatar} = JSON.parse(data.toString());
+            const {name, theme, avatar} = JSON.parse(data.toString().replace(/[\\]/g, ''));
             const payload = token.match(/(?<=\.).*?(?=\.)/)[0];
             const UID = JSON.parse(Token.decode(payload))['sub'];
 
