@@ -1,6 +1,6 @@
 const db = require('../model/database/databasePromise.js');
 const sql = require('../model/sql/loginSql.js');
-const token = require('../utils/token.js');
+const Token = require('../utils/token.js');
 
 // register，login，getCode，getAvatar不需要校验token
 module.exports = {
@@ -53,7 +53,7 @@ module.exports = {
                         avatar,
                         name,
                         theme,
-                        token: token.createToken(UID)
+                        token: Token.createToken(UID)
                     });
                 }
             } catch(e) {
@@ -86,18 +86,20 @@ module.exports = {
         })
     },
     update(req, res) {
-        req.on('data', (data)=> {
+        req.on('data', async (data)=> {
             const {token} = req.headers;
             const {name, theme, avatar} = JSON.parse(data.toString());
             const payload = token.match(/(?<=\.).*?(?=\.)/)[0];
             const UID = JSON.parse(Token.decode(payload))['sub'];
 
             if (token && Token.checkToken(token)) {
-                db(sql.update(UID, name, theme, avatar)).then(result=> {
+                try {
+                    const result = await db(sql.update(UID, name, theme, avatar));
+
                     res.status(200).json(result);
-                }, error=> {
-                    console.log(error);
-                })
+                } catch(e) {
+                    console.log(e);
+                }
             } else {
                 res.status(401).json({msg:'token检校失败'});
             }
