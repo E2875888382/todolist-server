@@ -1,6 +1,7 @@
 const db = require('../model/database/databasePromise.js');
 const sql = require('../model/sql/loginSql.js');
 const Token = require('../utils/token.js');
+const nodemailer = require('nodemailer');
 
 // register，login，getCode，getAvatar不需要校验token
 module.exports = {
@@ -62,12 +63,34 @@ module.exports = {
         })
     },
     getCode(req, res) {
+        const user = req.query.user;
         let n = Math.floor(Math.random() * 10000);
 
         if (n < 1000) {
             n += 1000;
         }
-        res.status(200).json({code: `${n}`});
+        const transporter = nodemailer.createTransport({
+            service: 'qq',
+            port: 465,
+            secureConnection: true,
+            auth: {
+                user: 'elrictang@qq.com',
+                pass: 'xxxxxxxxxxxxx' // 填写stmp授权码
+            }
+        });
+        const mailOptions = {
+            from: '"todolist开发者" <elrictang@qq.com>', // sender address
+            to: user, // list of receivers
+            subject: 'Hello', // Subject line
+            html: `<b>你的登录验证码为${n}</b>` // html body
+        };
+    
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                res.status(200).json({msg: error});
+            }
+            res.status(200).json({code: `${n}`});
+        });
     },
     getAvatar(req, res) {
         req.on('data', (data)=> {
